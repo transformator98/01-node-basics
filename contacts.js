@@ -1,16 +1,15 @@
-const fs = require('fs').promises;
+import * as fs from 'fs/promises';
 
-const path = require('path');
-const shortid = require('shortid');
+import colors from 'colors';
+
+import createDirname from './lib/dirname.js';
+const { __dirname } = createDirname(import.meta.url);
+import path from 'path';
+
+import { customAlphabet } from 'nanoid/non-secure';
+const nanoid = customAlphabet('1234567890', 4);
 
 const contactsPath = path.join(__dirname, './db/contacts.json');
-
-program.option(
-  '-l, --action="list" ',
-  '-g, --action="get" `--id=${id}` ',
-  '-a, --action="add" `--name=${name} --email=${email} --phone=${phone}`',
-  '-r, --action="remove" `--id=${id}`',
-);
 
 async function parsedContact() {
   try {
@@ -23,20 +22,50 @@ async function parsedContact() {
 
 async function listContacts() {
   try {
-    await fs.readFile(contactsPath, (_, data) => {
-      console.log(data.toString());
-    });
+    const contacts = await parsedContact();
+    console.table(contacts);
   } catch (error) {
     console.log(error.message);
   }
 }
 
-function getContactById(contactId) {
-  // ...твой код
+async function getContactById(contactId) {
+  try {
+    const contacts = await parsedContact();
+    const contactFilterId = contacts.find(
+      contact => Number(contact.id) === Number(contactId),
+    );
+
+    if (!contactFilterId)
+      return console.error(`Пользователя с id ${contactId} не найден`.red);
+
+    console.log(contactFilterId);
+    return contactFilterId;
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function removeContact(contactId) {
-  // ...твой код
+async function removeContact(contactId) {
+  try {
+    const contacts = await parsedContact();
+
+    const delContactId = contacts.filter(
+      contact => Number(contact.id) !== Number(contactId),
+    );
+    if (contacts.length === delContactId.length)
+      return console.log(`Пользователя с id ${contactId} не найден`.red);
+
+    fs.writeFile(contactsPath, JSON.stringify(delContactId, null, 2), err => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+    });
+    console.table(delContactId);
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
 async function addContact(name, email, phone) {
@@ -44,7 +73,7 @@ async function addContact(name, email, phone) {
     const contacts = await parsedContact();
 
     const contactAdd = {
-      id: shortid.generate(),
+      id: nanoid(),
       name,
       email,
       phone,
@@ -64,10 +93,11 @@ async function addContact(name, email, phone) {
     return console.log(error.message);
   }
 }
-
-module.exports = {
+const contactsFn = {
   listContacts,
   getContactById,
-  removeContact,
   addContact,
+  removeContact,
 };
+
+export default contactsFn;

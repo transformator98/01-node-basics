@@ -1,15 +1,30 @@
-const contacts = require('./contacts.js');
+import contacts from './contacts.js';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
-// const ivan = {
-//   'ivan',
-//   'Donec.elementum@scelerisquescelerisquedui.net',
-//   '(097) 111-1111',
-// };
+const argv = yargs(hideBin(process.argv)).argv;
 
-// console.log('contact', contacts.listContacts());
+function invokeAction({ action, id, name, email, phone }) {
+  switch (action) {
+    case 'list':
+      contacts.listContacts();
+      break;
 
-contacts.addContact(
-  'ivan',
-  'Donec.elementum@scelerisquescelerisquedui.net',
-  '(097) 111-1111',
-);
+    case 'get':
+      contacts.getContactById(id);
+      break;
+
+    case 'add':
+      contacts.addContact(name, email, phone);
+      break;
+
+    case 'remove':
+      contacts.removeContact(id);
+      break;
+
+    default:
+      console.warn('\x1B[31m Unknown action type!');
+  }
+}
+
+invokeAction(argv);
