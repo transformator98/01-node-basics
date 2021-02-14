@@ -1,29 +1,34 @@
-// const fs = require('fs').promises;
-const fs = require('fs');
+const fs = require('fs').promises;
+
 const path = require('path');
 const shortid = require('shortid');
 
-// const contactsPath = './db/contacts.json';
-const contactsPath = path.join('./db/contacts.json');
+const contactsPath = path.join(__dirname, './db/contacts.json');
 
-// console.log('contactsPath', contactsPath);
+program.option(
+  '-l, --action="list" ',
+  '-g, --action="get" `--id=${id}` ',
+  '-a, --action="add" `--name=${name} --email=${email} --phone=${phone}`',
+  '-r, --action="remove" `--id=${id}`',
+);
 
-// function listContacts() {
-//   fs.readFile(contactsPath, (err, data) => {
-//     console.log(data);
-//     console.log(err);
-//   });
-//   // .then(data => console.log(data.toString()))
-//   // .catch(err => console.log(err.message));
-// }
-function listContacts() {
-  fs.readFile(contactsPath, (err, data) => {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    console.log(data.toString());
-  });
+async function parsedContact() {
+  try {
+    const data = await fs.readFile(contactsPath);
+    return JSON.parse(data.toString());
+  } catch (error) {
+    return console.log(error.message);
+  }
+}
+
+async function listContacts() {
+  try {
+    await fs.readFile(contactsPath, (_, data) => {
+      console.log(data.toString());
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
 function getContactById(contactId) {
@@ -34,38 +39,30 @@ function removeContact(contactId) {
   // ...твой код
 }
 
-function addContact(name, email, phone) {
-  fs.readFile(contactsPath, (err, data) => {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    if (!fs.existsSync('./db')) {
-      fs.mkdirSync('./db');
-    }
-    const contact = {
+async function addContact(name, email, phone) {
+  try {
+    const contacts = await parsedContact();
+
+    const contactAdd = {
       id: shortid.generate(),
-      name: name,
-      email: email,
-      phone: phone,
-
-      toString() {
-        return `{"id":"${this.id}","name":"${this.name}","email":"${this.email}","phone":"${this.phone}"}`;
-      },
+      name,
+      email,
+      phone,
     };
-    console.log('data', data.toString());
-    const testData = data.toString();
 
-    const file = `...${testData} ${contact}`;
-    console.log(file);
+    const newContacts = [...contacts, contactAdd];
 
-    fs.writeFile('./db/contacts.json', `${file}`, err => {
+    fs.writeFile(contactsPath, JSON.stringify(newContacts, null, 2), err => {
       if (err) {
         console.log(err);
         return;
       }
     });
-  });
+    console.table(newContacts);
+    return newContacts;
+  } catch (error) {
+    return console.log(error.message);
+  }
 }
 
 module.exports = {
