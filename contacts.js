@@ -62,6 +62,7 @@ async function removeContact(contactId) {
         return;
       }
     });
+    console.log(`Контакт с id ${contactId} удален!`.green);
     console.table(delContactId);
   } catch (error) {
     console.log(error.message);
