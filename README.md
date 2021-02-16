@@ -3,7 +3,9 @@
 # Документирование функций
 
 - contactsPath - переменная для пути к contacts.json 
+--
 - listContacts - Получаем и выводим весь список контакстов в виде таблицы <br/>
+--
 <img  alt="List"  src="https://raw.githubusercontent.com/transformator98/01-node-basics/main/scrin/list.jpg" /> <br/>
 - getContactById - получить контакт по идинтификатору <br/>
 <img  alt="Get"  src="https://raw.githubusercontent.com/transformator98/01-node-basics/main/scrin/get.jpg" /><br/>
